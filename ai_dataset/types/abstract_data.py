@@ -29,26 +29,9 @@ class AbstractData(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def split_datset(self, len: int):
+    def split(self, length: int):
         """
 
-        :param len:
-        :return:
-        """
-
-    @abstractmethod
-    def reshape_data(self, shape):
-        """
-
-        :param shape:
-        :return:
-        """
-
-    @abstractmethod
-    def norm_data(self, mean: tuple, std: tuple):
-        """
-
-        :param mean:
-        :param std:
+        :param length:
         :return:
         """

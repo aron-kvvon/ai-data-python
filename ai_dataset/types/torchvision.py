@@ -4,6 +4,7 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+import torch.utils.data as data
 
 from ai_dataset.types.abstract_data import AbstractData
 from ai_dataset.utils.path import DATA_DIR
@@ -44,14 +45,19 @@ class TorchData(AbstractData):
 
         return dataset
 
+    def concatenate(self, add_data: 'TorchData'):
+        self._dataset = data.ConcatDataset([self._dataset, add_data.get_dataset()])
+
     def extend_label(self, ext_label):
         pass
 
-    def split_datset(self, len: int):
-        pass
+    def split(self, length: int):
+        if length > len(self._dataset):
+            print(f'Split length: {length} is bigger than the length of dataset is :{len(self._dataset)}')
+            return None
 
-    def reshape_data(self, shape):
-        pass
-
-    def norm_data(self, mean: tuple, std: tuple):
-        pass
+        # [len of subset1, len of subset2]
+        split = [length, len(self._dataset) - length]
+        # method name is random_split but it is not.
+        subset1, subset2 = data.random_split(self._dataset, split)
+        return TorchData(self.type, self.is_train, subset1), TorchData(self.type, self.is_train, subset2)

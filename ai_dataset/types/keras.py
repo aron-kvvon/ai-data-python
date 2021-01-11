@@ -58,11 +58,5 @@ class KerasData(AbstractData):
     def extend_label(self, ext_label):
         pass
 
-    def split_datset(self, len: int):
-        pass
-
-    def reshape_data(self, shape):
-        pass
-
-    def norm_data(self, mean: tuple, std: tuple):
+    def split(self, len: int):
         pass
