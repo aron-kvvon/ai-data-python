@@ -16,6 +16,35 @@ torch_dataset_list = {
 }
 
 
+class ExtendedTorchData(data.Dataset):
+    def __init__(self, dataset, ext_label):
+        """
+
+        :param dataset:
+        :param ext_label: Additional labels, it can be integer, tuple, and list
+        """
+        super().__init__()
+        self.dataset = dataset
+        if isinstance(ext_label, int):
+            # same value for all data
+            self.ext_labels = [ext_label] * len(dataset)
+        elif isinstance(ext_label, list) or isinstance(ext_label, tuple):
+            if len(dataset) != len(ext_label):
+                print(f'Warning!, The length of dataset is different from the ext_labels')
+            self.ext_labels = ext_label
+        else:
+            print(f'Extended label type:{type(ext_label)} must be int, list, or tuple')
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        image = self.dataset[idx][0]
+        label = self.dataset[idx][1]
+        ext_label = self.ext_labels[idx]
+        return image, label, ext_label
+
+
 class TorchData(AbstractData):
     def __init__(self, type=None, is_train=True, dataset_in=None):
         """
@@ -48,16 +77,20 @@ class TorchData(AbstractData):
     def concatenate(self, add_data: 'TorchData'):
         self._dataset = data.ConcatDataset([self._dataset, add_data.get_dataset()])
 
-    def extend_label(self, ext_label):
-        pass
+    def extend_label(self, ext_labels):
+        self._dataset = ExtendedTorchData(self._dataset, ext_labels)
 
     def split(self, length: int):
         if length > len(self._dataset):
             print(f'Split length: {length} is bigger than the length of dataset is :{len(self._dataset)}')
             return None
 
-        # [len of subset1, len of subset2]
-        split = [length, len(self._dataset) - length]
+        partition = [length, len(self._dataset) - length]
+
         # method name is random_split but it is not.
-        subset1, subset2 = data.random_split(self._dataset, split)
-        return TorchData(self.type, self.is_train, subset1), TorchData(self.type, self.is_train, subset2)
+        part1, part2 = data.random_split(self._dataset, partition)
+        return TorchData(self.type, self.is_train, part1), TorchData(self.type, self.is_train, part2)
+
+    def subset(self, indices: list):
+        subset = data.Subset(self._dataset, indices)
+        return TorchData(self.type, self.is_train, subset)
