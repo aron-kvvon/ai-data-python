@@ -14,9 +14,9 @@ class TestTorchData(unittest.TestCase):
     def setUp(self):
         # X of test dataset: 100 samples of 32x32 shape
         # Y of test dataset: 100 samples of 0~9 integer
-        x = torch.Tensor(np.random.randn(self.test_length, 32, 32))
-        y = torch.Tensor(np.random.randint(0, 9, self.test_length))
-        test_dataset = data.TensorDataset(x, y)
+        x = np.random.randn(self.test_length, 32, 32, 3)
+        y = np.random.randint(0, 9, self.test_length)
+        test_dataset = data.TensorDataset(torch.Tensor(x), torch.Tensor(y))
         self.instance = TorchData('test', False, test_dataset)
 
     def test_len(self):
@@ -49,10 +49,14 @@ class TestTorchData(unittest.TestCase):
 
         part1, part2 = self.instance.split(split_len)
 
+        # extend label: [0, 1, 2, ... split_len-1]
         part1.extend_label(list(range(0, split_len)))
+        # compare with the first item of the extend label: 0
         self.assertEqual(part1.get_dataset()[0][2], 0)
 
+        # extend label: [int_ext_label, int_ext_label, ... ]
         part2.extend_label(int_ext_label)
+        # compare with the integer extend label
         self.assertEqual(part2.get_dataset()[0][2], int_ext_label)
 
     def tearDown(self):
