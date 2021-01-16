@@ -51,12 +51,43 @@ class KerasData(AbstractData):
         if self.type == 'mnist':
             images = np.expand_dims(images, axis=-1)
         images = images.astype(np.float32) / 255.
+        # label was just an integer. integer was changed to list
+        # categorical or just integer
         num_classes = labels.max() + 1
         labels = to_categorical(labels, num_classes)
         return images, labels
 
-    def extend_label(self, ext_label):
-        pass
+    def concatenate(self, add_data: 'KerasData'):
+        self._dataset = self._dataset.concatenate(add_data.get_dataset())
 
-    def split(self, len: int):
+    def extend_label(self, ext_label):
+        length = len(list(self._dataset))
+        # data_[0]: x (image vectors)
+        # data_[1]: y (label)
+        data_ = next(self._dataset.batch(length).as_numpy_iterator())
+        if isinstance(ext_label, int):
+            # same value for all data
+            list_ext_labels = [ext_label] * len(data_[1])
+        elif isinstance(ext_label, list) or isinstance(ext_label, tuple):
+            if len(data_[1]) != len(ext_label):
+                print(f'Warning!, The length of dataset is different from the ext_labels')
+            list_ext_labels = ext_label
+        else:
+            print(f'Extended label type:{type(ext_label)} must be int, list, or tuple')
+
+        self._dataset = tf.data.Dataset.from_tensor_slices((data_[0], data_[1], list_ext_labels))
+
+    def split(self, length):
+        if length > len(list(self._dataset)):
+            print(f'Split length: {length} is bigger than the length of dataset is :{len(list(self._dataset))}')
+            return self, None
+
+        remain = len(list(self._dataset)) - length
+
+        part1 = KerasData(self.type, self.is_train, self._dataset.take(length))
+        part2 = KerasData(self.type, self.is_train, self._dataset.skip(length).take(remain))
+
+        return part1, part2
+
+    def subset(self, indices):
         pass

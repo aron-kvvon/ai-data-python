@@ -80,10 +80,10 @@ class TorchData(AbstractData):
     def extend_label(self, ext_labels):
         self._dataset = ExtendedTorchData(self._dataset, ext_labels)
 
-    def split(self, length: int):
+    def split(self, length):
         if length > len(self._dataset):
             print(f'Split length: {length} is bigger than the length of dataset is :{len(self._dataset)}')
-            return None
+            return self, None
 
         partition = [length, len(self._dataset) - length]
 
@@ -91,6 +91,6 @@ class TorchData(AbstractData):
         part1, part2 = data.random_split(self._dataset, partition)
         return TorchData(self.type, self.is_train, part1), TorchData(self.type, self.is_train, part2)
 
-    def subset(self, indices: list):
+    def subset(self, indices):
         subset = data.Subset(self._dataset, indices)
         return TorchData(self.type, self.is_train, subset)

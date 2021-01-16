@@ -35,3 +35,11 @@ class AbstractData(metaclass=ABCMeta):
         :param length:
         :return:
         """
+
+    @abstractmethod
+    def subset(self, indices: list):
+        """
+
+        :param indices:
+        :return:
+        """
