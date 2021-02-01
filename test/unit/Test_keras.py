@@ -3,6 +3,7 @@
 import unittest
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.utils import to_categorical
 
 from ai_dataset.types.keras import KerasData
 
@@ -15,6 +16,7 @@ class TestKerasData(unittest.TestCase):
         # Y of test dataset: 100 samples of 0~9 integer
         x = np.random.randn(self.test_length, 32, 32, 3)
         y = np.random.randint(0, 9, self.test_length)
+        y = to_categorical(y, 9)
         test_dataset = tf.data.Dataset.from_tensor_slices((x, y))
         self.instance = KerasData('test', False, test_dataset)
 
