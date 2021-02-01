@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 import torch.utils.data as data
 
 from ai_dataset.types.abstract_data import AbstractData
-from ai_dataset.utils.path import DATA_DIR
+from ai_dataset.utils.config_path import DATA_DIR
 
 torch_dataset_list = {
     'mnist': torchvision.datasets.MNIST,
